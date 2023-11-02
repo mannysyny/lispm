@@ -42,7 +42,7 @@ check_nil:
 ; Cons Obj with nil to create a list of 1 element.
 define %object* @cons(%object* %head, %object* %tail) {
     %is_null = icmp eq %object* null, %tail
-    br i1 %is_null, label %cons_list, label %check_list
+    br i1 %is_null, label %cons_nil, label %check_list
 
 check_list:
     %tailTag = call i32 @tag(%object* %tail)
@@ -66,8 +66,7 @@ cons_list:
     ret %object* %objectPtr
 
 cons_nil:
-    %nil = load %object*, %object** @val_nil
-    %tailList = call %object* @cons(%object* %tail, %object* %nil)
+    %tailList = call %object* @cons(%object* %tail, @val_nil)
     %fullList = call %object* @cons(%object* %head, %object* %tailList)
     ret %object* %fullList
 }
