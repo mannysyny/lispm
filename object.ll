@@ -1,4 +1,5 @@
 declare i8* @malloc(i32) nounwind
+declare i32 @printf(i8*, ...) nounwind
 
 ; Tag values:
 ; 0 - List
@@ -34,3 +35,19 @@ define i8* @getValue(%object* %obj) {
     %val = load i8*, i8** %valPtr
     ret i8* %val
 }
+
+define void @printObject(%object* %obj) {
+    %tag = call i32 @getTag(%object* %obj)
+    %val = call i8* @getValue(%object* %obj)
+
+    %tagStr = select i1 %tag == 0, [4 x i8]* @.str.list, [6 x i8]* @.str.token
+    %tagFmt = select i1 %tag == 0, [4 x i8]* @.str.list_fmt, [6 x i8]* @.str.token_fmt
+
+    call i32 (i8*, ...) @printf(i8* %tagFmt, [4 x i8]* %tagStr, i8* %val)
+    ret void
+}
+
+@.str.list = private unnamed_addr constant [4 x i8] c"List\00"
+@.str.token = private unnamed_addr constant [6 x i8] c"Token\00"
+@.str.list_fmt = private unnamed_addr constant [7 x i8] c"%s: %p\0A\00"
+@.str.token_fmt = private unnamed_addr constant [9 x i8] c"%s: %s\0A\00"
