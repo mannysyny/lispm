@@ -31,8 +31,8 @@ declare %struct.object* @make_string(i8*)
 %struct.integer = type { i32 }
 %struct.string = type { i8*, i32 }
 
-; Define functions
-define i32 @read(i8* %stream, %struct.list** %list) {
+; New function to read a string
+define %struct.object* @read_string(i8* %stream, %struct.list** %list) {
 entry:
     %1 = call i32 @getc(i8* %stream)
     %2 = icmp eq i32 %1, -1
@@ -71,16 +71,15 @@ read_macro:
 
 not_macro:
     %16 = icmp eq i8 %3, @.term
-    br i1 %16, label %end_list, label %not_term
+    br i1 %16, label %end_string, label %not_term
 
 not_term:
-    %17 = call %struct.object* @make_symbol(i8* %stream)
-    %18 = call %struct.object* @make_cons(%struct.object* %17, %struct.object* null)
-    %19 = call %struct.object* @make_cons(%struct.object* %18, %struct.object* null)
-    %20 = call %struct.object* @make_cons(%struct.object* %19, %struct.object* null)
-    %21 = call %struct.object* @make_list(%struct.list* %list)
-    %22 = call %struct.object* @make_cons(%struct.object* %20, %struct.object* %21)
+    %17 = call %struct.object* @make_string(i8* %stream)
     br label %eof
+
+end_string:
+    %18 = call %struct.object* @make_string(i8* %stream)
+    ret %struct.object* %18
 
 eof:
     ret i32 0
@@ -121,3 +120,4 @@ entry:
     %4 = bitcast %struct.object* (%struct.list*, i8*, i32)* @end_list to i8*
     store i8* %4, i8** %3
 }
+
