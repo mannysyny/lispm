@@ -570,9 +570,27 @@ define void @runtime_error(i8* %message) {
         unreachable
     }
 
-    define void @runtime_error(i8* %message) {
+    @error_fmt = private unnamed_addr constant [8 x i8] c"Error: %s\0A\00"
+    @syntax_error_fmt = private unnamed_addr constant [15 x i8] c"%s: syntax error\0A\00"
+    @runtime_error_fmt = private unnamed_addr constant [16 x i8] c"%s: runtime error\0A\00"
+
+    define void @assert(i1 %condition, i8* %message) {
+        ; Check if the condition is true
+        %is_true = icmp eq i1 %condition, true
+        br i1 %is_true, label %assert_passed, label %assert_failed
+
+    assert_failed:
+        ; Raise a runtime error with the error message
+        call void @runtime_error(i8* %message)
+
+    assert_passed:
+        ; The assertion passed, do nothing
+        ret void
+    }
+
+    define void @syntax_error(i8* %message) {
         ; Print the error message
-        %format_str = getelementptr inbounds [16 x i8], [16 x i8]* @runtime_error_fmt, i32 0, i32 0
+        %format_str = getelementptr inbounds [15 x i8], [15 x i8]* @syntax_error_fmt, i32 0, i32 0
         call i32 (i8*, ...) @printf(i8* %format_str, i8* %message)
 
         ; Exit the program with an error code
