@@ -1,26 +1,35 @@
-;; Defining basic logic gates
-(defun and-gate (a b)
-    (if (and a b) 'true '()))
-
+;; Define basic logic gates
 (defun or-gate (a b)
-    (if (or a b) 'true '()))
+    (or a b))
 
 (defun xor-gate (a b)
-    (if (not (equal a b)) 'true '()))
+    (not (equal a b)))
 
 (defun not-gate (a)
-    (if a '() 'true))
+    (not a))
 
-;; Defining functions for binary addition
+;; Define functions for binary addition
 (defun add (a b)
     (if (null b) a
-            (add (carry a b) (cdr b))))
+        (add (carry a b) (cdr b))))
 
 (defun carry (a b)
     (if (and (null a) (null b)) '()
-            (or-gate (and-gate (car a) (car b))
-                             (carry (cdr a) (cdr b)))))
+        (or-gate (and-gate (car a) (car b))
+                 (carry (cdr a) (cdr b))))
 
-;; Define '+' as a wrapper for add function
+;; Define functions for binary subtraction
+(defun subtract (a b)
+    (if (null b) a
+        (subtract (borrow a b) (cdr b))))
+
+(defun borrow (a b)
+    (if (and (null a) (null b)) '()
+        (and-gate (not-gate (car a)) (borrow (cdr a) (cdr b))))
+
+;; Define '+' and '-' as wrappers for add and subtract functions
 (defun + (a b)
     (add a b))
+
+(defun - (a b)
+    (subtract a b))
