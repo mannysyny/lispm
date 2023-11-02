@@ -21,10 +21,18 @@ define i32 @repl(i8* %input) {
     call void @printToken(i8* %prompt)
     %token = call %object* @read(i8* %input)
     %is_eof = icmp eq %object* null, %token
-    br i1 %is_eof, label %ret_done, label %eval_token
+    br i1 %is_eof, label %ret_done, label %check_exit
 
 ret_done:
     call i32 @putchar(i32 10)
+    ret i32 0
+
+check_exit:
+    %exit_str = getelementptr [5 x i8], [5 x i8] c"exit\00", i64 0, i64 0
+    %is_exit = call i1 @streq(i8* %token, i8* %exit_str)
+    br i1 %is_exit, label %exit_repl, label %eval_token
+
+exit_repl:
     ret i32 0
 
 eval_token:
@@ -35,6 +43,8 @@ eval_token:
     %ret = call i32 @repl(i8* %input)
     ret i32 %ret
 }
+
+declare i1 @streq(i8*, i8*) nounwind
 
 define i32 @main(i32 %argc, i8** %argv) {
     %cast_open_mode = getelementptr [2 x i8], [2 x i8]* @.open_mode, i64 0, i64 0
